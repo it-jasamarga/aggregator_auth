@@ -46,7 +46,7 @@ class AuthService
 			],422);
 		}
 
-		$record = UserAuth::where('username',request()->username)->first();
+		$record = UserAuth::where(\DB::raw('LOWER(username)'),strtolower(request()->username))->first();
 		if($record){
 			
 			$checkPass = $this->checkPassword($record);
@@ -61,8 +61,8 @@ class AuthService
 					if($checkLdap == false){
 						return response()->json([
 							'status' => 400,
-		                    'message' => 'LDAP Authentication Not Able For This Account',
-		                    'data' => 'LDAP Authentication Not Able For This Account'
+		                    'message' => 'Username / Password Tidak Diketahui',
+		                    'data' => 'Username / Password Tidak Diketahui'
 						],400);
 					}
 
@@ -271,7 +271,7 @@ class AuthService
 	        'position_id'		=> (@$data['employe_position']['position_id']) ? $data['employe_position']['position_id'] : null,
 	        'unit_kerja_id'		=> (@$data['employe_position']['unit_kerja_id']) ? $data['employe_position']['unit_kerja_id'] : null,
 		];
-		$generateJwt = $this->generateJwt($dataPayload);
+		$generateJwt = $this->generateJwt($dataPayload, $record);
 
 		if($generateJwt['status'] == 400){
 			return $generateJwt;
@@ -291,7 +291,7 @@ class AuthService
 	}
 
 	// GENERATE JWT
-	public function generateJwt($data){
+	public function generateJwt($data, $record){
 		$masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
     	$hashpassword = Hash::check(request()->password,$masterPassword);
     	
@@ -303,7 +303,7 @@ class AuthService
 			$data["nbf"] = Carbon::now()->timestamp;
 			$data["jti"] = Helper::generateRandomString(35);
 			$data["sub"] = '0.0.0.0';
-			$data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
+			// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
 
 			$token = JWT::encode($data, env('JWT_SECRET'), 'HS256');
 			// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
@@ -318,25 +318,27 @@ class AuthService
 	        ];
 
     	}else{
-    		if (!$token = \Auth::claims($data)->attempt([
-				'username' => request()->username,
-				'password' => request()->password,
-			])){
-	            return [
-	            	'status' => 400,
-	                'message' =>  'Username Not Found',
-	                'data' =>  []
-	            ];
-	        }
+			if(($record->ldap != 1) OR ($record->ldap != '1')){
+				if (!$token = \Auth::claims($data)->attempt([
+					'username' => $record->username,
+					'password' => request()->password,
+				])){
+		            return [
+		            	'status' => 400,
+		                'message' =>  'Username Not Found',
+		                'data' =>  []
+		            ];
+		        }
 
-	        return [
-	        	'status' => 200,
-	            'message' =>  'Success Login',
-	            'data' =>  [
-	            	'token' => $token,
-	            	'expires' => auth('api')->payload()('exp')
-	            ]
-	        ];
+		        return [
+		        	'status' => 200,
+		            'message' =>  'Success Login',
+		            'data' =>  [
+		            	'token' => $token,
+		            	'expires' => auth('api')->payload()('exp')
+		            ]
+		        ];
+			}
     	}
 	}
 
