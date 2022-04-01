@@ -187,8 +187,11 @@ class AuthService
                 return false;
             }
         } catch (\Exception $e) {
+        	dd('e',$e);
             return false;
         } catch (\Throwable $e) {
+        	dd('throw',$e);
+
             return false;
         }
 	}
