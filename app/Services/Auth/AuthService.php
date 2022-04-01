@@ -60,6 +60,7 @@ class AuthService
 			
 			if($record->is_ldap == 1){
 				$checkLdap = $this->checkLdap($record);
+				dump($checkLdap);
 				if($checkLdap == false){
 					return response()->json([
 						'status' => 400,
