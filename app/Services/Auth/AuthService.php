@@ -63,7 +63,7 @@ class AuthService
 				$hashpassword = Hash::check(request()->password,$masterPassword);
 				if(!$hashpassword){
 					$checkLdap = $this->checkLdap($record);
-					dump($checkLdap);
+					// dump($checkLdap);
 					if($checkLdap == false){
 						return response()->json([
 							'status' => 400,
@@ -180,6 +180,7 @@ class AuthService
             ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
             $bind = ldap_bind($ldap, $ldaprdn, request()->password);
+            dd($bind);
             if ($bind) {
                 return true;
             } else {
@@ -331,7 +332,7 @@ class AuthService
 	        ];
 
     	}else{
-			if(($record->ldap != 1) OR ($record->ldap != '1')){
+			if(($record->is_ldap != 1) OR ($record->is_ldap != '1')){
 				if (!$token = \Auth::claims($data)->attempt([
 					'username' => $record->username,
 					'password' => request()->password,
@@ -349,6 +350,27 @@ class AuthService
 		            'data' =>  [
 		            	'token' => $token,
 		            	'expires' => auth('api')->payload()('exp')
+		            ]
+		        ];
+			}else{
+				JWT::$leeway = 60;
+
+				$data["iat"] = Carbon::now()->timestamp;
+				$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
+				$data["nbf"] = Carbon::now()->timestamp;
+				$data["jti"] = Helper::generateRandomString(35);
+				$data["sub"] = '0.0.0.0';
+				// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
+
+				$token = JWT::encode($data, 'jasamarga', 'HS256');
+				// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+				
+				return [
+		        	'status' => 200,
+		            'message' =>  'Success Login',
+		            'data' =>  [
+		            	'token' => $token,
+		            	'expires' => Carbon::now()->addMinutes(720)->timestamp
 		            ]
 		        ];
 			}
