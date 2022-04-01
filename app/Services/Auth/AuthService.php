@@ -317,7 +317,7 @@ class AuthService
 			$data["sub"] = '0.0.0.0';
 			// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
 
-			$token = JWT::encode($data, env('JWT_SECRET'), 'HS256');
+			$token = JWT::encode($data, 'jasamarga', 'HS256');
 			// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
 			
 			return [
