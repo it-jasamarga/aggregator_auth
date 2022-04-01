@@ -57,11 +57,10 @@ class AuthService
 				],400);
 			}
 			
-			
+			$checkPass['checkHash'] = false;
 			if($record->is_ldap == 1){
 				$masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
 				$hashpassword = Hash::check(request()->password,$masterPassword);
-				
 				if(!$hashpassword){
 					$checkLdap = $this->checkLdap($record);
 					dump($checkLdap);
@@ -72,6 +71,8 @@ class AuthService
 		                    'data' => 'Username / Password Tidak Diketahui'
 						],400);
 					}
+				}else{
+					$checkPass['checkHash'] = true;
 				}
 			}else{
 				$checkPass = $this->checkPassword($record);
