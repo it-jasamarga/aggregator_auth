@@ -57,24 +57,22 @@ class AuthService
 				],400);
 			}
 			
-			$checkPass = $this->checkPassword($record);
-			if($checkPass['status'] == 400){
-				return response()->json($checkPass,$checkPass['status']);
-			}
-
+			
 			if($record->is_ldap == 1){
-				if($checkPass['checkHash'] === false){
-
-					$checkLdap = $this->checkLdap($record);
-					if($checkLdap == false){
-						return response()->json([
-							'status' => 400,
-		                    'message' => 'Username / Password Tidak Diketahui',
-		                    'data' => 'Username / Password Tidak Diketahui'
-						],400);
-					}
-
+				$checkLdap = $this->checkLdap($record);
+				if($checkLdap == false){
+					return response()->json([
+						'status' => 400,
+	                    'message' => 'Username / Password Tidak Diketahui',
+	                    'data' => 'Username / Password Tidak Diketahui'
+					],400);
 				}
+			}else{
+				$checkPass = $this->checkPassword($record);
+				if($checkPass['status'] == 400){
+					return response()->json($checkPass,$checkPass['status']);
+				}
+
 			}
 
 			$remapData = $this->remapData($record);
