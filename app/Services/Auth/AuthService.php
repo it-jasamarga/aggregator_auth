@@ -180,17 +180,17 @@ class AuthService
             ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
             $bind = ldap_bind($ldap, $ldaprdn, request()->password);
-            dd($bind);
+            // dd($bind);
             if ($bind) {
                 return true;
             } else {
                 return false;
             }
         } catch (\Exception $e) {
-        	dd('e',$e);
+        	// dd('e',$e);
             return false;
         } catch (\Throwable $e) {
-        	dd('throw',$e);
+        	// dd('throw',$e);
 
             return false;
         }
