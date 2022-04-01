@@ -48,6 +48,14 @@ class AuthService
 
 		$record = UserAuth::where(\DB::raw('LOWER(username)'),strtolower(request()->username))->first();
 		if($record){
+
+			if($record->active == 0){
+				return response()->json([
+					'status' => 401,
+                    'message' => 'Akun Pengguna Saat Ini Tidak Aktif',
+                    'data' => 'Akun Pengguna Saat Ini Tidak Aktif'
+				],400);
+			}
 			
 			$checkPass = $this->checkPassword($record);
 			if($checkPass['status'] == 400){
