@@ -67,8 +67,8 @@ class AuthService
 					if($checkLdap == false){
 						return response()->json([
 							'status' => 400,
-		                    'message' => 'Username / Password Tidak Diketahui',
-		                    'data' => 'Username / Password Tidak Diketahui'
+		                    'message' => 'Password Salah',
+		                    'data' => 'Password Salah'
 						],400);
 					}
 				}else{
@@ -91,7 +91,7 @@ class AuthService
 		}else{
 			return response()->json([
 				'status' => 400,
-				'message' => 'Username Not Found',
+				'message' => 'Username Tidak Ditemukan',
 				'data' => []
 			],400); 
 		}
@@ -166,7 +166,7 @@ class AuthService
 		}else{
 			return [
 				"status" => 400,
-			    "message" => "Wrong Username / Password",
+			    "message" => "Password Salah",
 			    "data" => false
 			];
 		}
@@ -342,7 +342,7 @@ class AuthService
 				])){
 		            return [
 		            	'status' => 400,
-		                'message' =>  'Username Not Found',
+		                'message' =>  'Username Tidak Ditemukan',
 		                'data' =>  []
 		            ];
 		        }
