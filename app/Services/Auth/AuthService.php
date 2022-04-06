@@ -57,22 +57,18 @@ class AuthService
 				],400);
 			}
 			
-			$checkPass['checkHash'] = false;
+			// $checkPass['checkHash'] = false;
 			if($record->is_ldap == 1){
-				$masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
-				$hashpassword = Hash::check(request()->password,$masterPassword);
-				if(!$hashpassword){
-					$checkLdap = $this->checkLdap($record);
-					// dump($checkLdap);
-					if($checkLdap == false){
-						return response()->json([
-							'status' => 400,
-		                    'message' => 'Password Salah',
-		                    'data' => 'Password Salah'
-						],400);
-					}
-				}else{
-					$checkPass['checkHash'] = true;
+				// $masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
+				// $hashpassword = Hash::check(request()->password,$masterPassword);
+				$checkLdap = $this->checkLdap($record);
+				// dump($checkLdap);
+				if($checkLdap == false){
+					return response()->json([
+						'status' => 400,
+	                    'message' => 'Password Salah',
+	                    'data' => 'Password Salah'
+					],400);
 				}
 			}else{
 				$checkPass = $this->checkPassword($record);
@@ -83,9 +79,7 @@ class AuthService
 			}
 
 			$remapData = $this->remapData($record);
-			if($checkPass['checkHash']){
-				$remapData['message'] = 'Anda menggunakan password default, silahkan reset password anda';
-			}
+			
 			return response()->json($remapData,$remapData['status']);
 
 		}else{
@@ -310,11 +304,28 @@ class AuthService
 
 	// GENERATE JWT
 	public function generateJwt($data, $record){
-		$masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
-    	$hashpassword = Hash::check(request()->password,$masterPassword);
-    	
-    	if($hashpassword){
-    		JWT::$leeway = 60;
+		if(($record->is_ldap != 1) OR ($record->is_ldap != '1')){
+			if (!$token = \Auth::claims($data)->attempt([
+				'username' => $record->username,
+				'password' => request()->password,
+			])){
+	            return [
+	            	'status' => 400,
+	                'message' =>  'Username Tidak Ditemukan',
+	                'data' =>  []
+	            ];
+	        }
+
+	        return [
+	        	'status' => 200,
+	            'message' =>  'Success Login',
+	            'data' =>  [
+	            	'token' => $token,
+	            	'expires' => auth('api')->payload()('exp')
+	            ]
+	        ];
+		}else{
+			JWT::$leeway = 60;
 
 			$data["iat"] = Carbon::now()->timestamp;
 			$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
@@ -334,51 +345,7 @@ class AuthService
 	            	'expires' => Carbon::now()->addMinutes(720)->timestamp
 	            ]
 	        ];
-
-    	}else{
-			if(($record->is_ldap != 1) OR ($record->is_ldap != '1')){
-				if (!$token = \Auth::claims($data)->attempt([
-					'username' => $record->username,
-					'password' => request()->password,
-				])){
-		            return [
-		            	'status' => 400,
-		                'message' =>  'Username Tidak Ditemukan',
-		                'data' =>  []
-		            ];
-		        }
-
-		        return [
-		        	'status' => 200,
-		            'message' =>  'Success Login',
-		            'data' =>  [
-		            	'token' => $token,
-		            	'expires' => auth('api')->payload()('exp')
-		            ]
-		        ];
-			}else{
-				JWT::$leeway = 60;
-
-				$data["iat"] = Carbon::now()->timestamp;
-				$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
-				$data["nbf"] = Carbon::now()->timestamp;
-				$data["jti"] = Helper::generateRandomString(35);
-				$data["sub"] = '0.0.0.0';
-				// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
-
-				$token = JWT::encode($data, 'jasamarga', 'HS256');
-				// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-				
-				return [
-		        	'status' => 200,
-		            'message' =>  'Success Login',
-		            'data' =>  [
-		            	'token' => $token,
-		            	'expires' => Carbon::now()->addMinutes(720)->timestamp
-		            ]
-		        ];
-			}
-    	}
+		}
 	}
 
 }
