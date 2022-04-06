@@ -297,7 +297,8 @@ class AuthService
 		$data['jwt'] = $generateJwt['data'];
 
 		$record->update([
-			'TOKEN' => $generateJwt['data']['token']
+			'TOKEN' => $generateJwt['data']['token'],
+			'LAST_LOGIN' => Carbon::now()->format('Y-m-d H:i:s'),
 		]);
 
 		return [
