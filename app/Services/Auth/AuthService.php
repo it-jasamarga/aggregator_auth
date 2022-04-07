@@ -224,6 +224,7 @@ class AuthService
 	        "v_username" 		=> $record->username,
 	        "role" 				=> null,
 	        "multi_role" 		=> [],
+	        "employee_number" 	=> ($employee) ? $employee->npp : null,
 	        "kd_comp" 			=> ($employee) ? $employee->kd_comp : null,
 	        "kd_unit" 			=> ($employee) ? $employee->unit_id : null,
 	        "kd_comp_penugasan" => ($employeePosition) ? $employeePosition->company_code_penugasan : null,
@@ -330,7 +331,7 @@ class AuthService
 			$data["iat"] = Carbon::now()->timestamp;
 			$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
 			$data["nbf"] = Carbon::now()->timestamp;
-			$data["jti"] = Helper::generateRandomString(35);
+			$data["jti"] = Helper::generateRandomString(16);
 			$data["sub"] = '0.0.0.0';
 			// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
 
