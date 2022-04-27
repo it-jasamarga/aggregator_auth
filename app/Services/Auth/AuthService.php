@@ -226,7 +226,7 @@ class AuthService
 
 		$data = [
 			"id" 				=> $record->id,
-	        "username" 			=> $record->username,
+	        "username" 			=> ($employee) ? $employee->npp : null;
 	        "v_username" 		=> $record->username,
 	        "role" 				=> null,
 	        "multi_role" 		=> [],
@@ -274,7 +274,7 @@ class AuthService
 		$userId = $userId.$data['kd_comp'];
 		$dataPayload = [
 	        'user' 				=> request()->username,
-	        'username' 			=> request()->username,
+	        'username' 			=> ($employee) ? $employee->npp : null,
 	        'v_username' 		=> request()->username,
 	        'kd_comp' 			=> $data['kd_comp'],
 	        'kd_comp_penugasan' => $data['kd_comp_penugasan'],
