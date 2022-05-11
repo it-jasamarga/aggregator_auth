@@ -226,7 +226,7 @@ class AuthService
 
 		$data = [
 			"id" 				=> $record->id,
-	        "username" 			=> ($employee) ? $employee->npp : null;
+	        "username" 			=> ($employee) ? $employee->npp : null,
 	        "v_username" 		=> $record->username,
 	        "role" 				=> null,
 	        "multi_role" 		=> [],
