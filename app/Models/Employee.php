@@ -265,4 +265,9 @@ class Employee extends Model
     {
         return $this->hasMany(EmployeeGrade::class, 'employee_id');
     }
+
+    public function employeeFile(): HasMany
+    {
+        return $this->hasMany(EmployeeFile::class, 'employee_id');
+    }
 }

@@ -211,6 +211,16 @@ class AuthService
 			}
 		}
 
+		$urlImage = null;
+		if($dataRes){
+			if($dataRes->employeeFile->count() > 0){
+				$checkFile = $dataRes->employeeFile->where('active','1')->first();
+				if($checkFile){
+					$urlImage = $checkFile->url;
+				}
+			}
+		}
+		
 		$data = [
 			"id" 				=> $record->id,
 	        "username" 			=> ($employee) ? $employee->npp : null,
@@ -240,7 +250,7 @@ class AuthService
 	        	"status_npwp" 			=> ($dataRes) ? $dataRes->status_npwp : null,
 	        	"email_address" 		=> ($dataRes) ? $dataRes->email_address : null,
 	        	"emp_status" 			=> ($dataRes) ? $dataRes->emp_status : null,
-	        	"url_image" 			=> ($dataRes) ? $dataRes->url_image : null,
+	        	"url_image" 			=> $urlImage,
 	        	"person_number_sap" 	=> ($dataRes) ? $dataRes->person_number_sap : null,
 	        	"fungsi_jabatan" 		=> ($dataRes) ? $dataRes->fungsi_jabatan : null,
 	        	"front_title_education" => ($dataRes) ? $dataRes->front_title_education : null,
@@ -298,75 +308,48 @@ class AuthService
 
 	// GENERATE JWT
 	public function generateJwt($data, $record){
-		// $masterPassword = '$2y$10$LlM0TBdbpxp4wwVLdcQ7T.lyPEJk2d6o4ldcZBzhK.GiYF1n.9HBe';
-  //   	$hashpassword = Hash::check(request()->password,$masterPassword);
-    	
-  //   	if($hashpassword){
-  //   		JWT::$leeway = 60;
+		if(($record->is_ldap != 1) OR ($record->is_ldap != '1')){
+			if (!$token = \Auth::claims($data)->attempt([
+				'username' => $record->username,
+				'password' => request()->password,
+			])){
+	            return [
+	            	'status' => 400,
+	                'message' =>  'Username / Password Salah',
+	                'data' =>  []
+	            ];
+	        }
 
-		// 	$data["iat"] = Carbon::now()->timestamp;
-		// 	$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
-		// 	$data["nbf"] = Carbon::now()->timestamp;
-		// 	$data["jti"] = Helper::generateRandomString(35);
-		// 	$data["sub"] = '0.0.0.0';
-		// 	// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
+	        return [
+	        	'status' => 200,
+	            'message' =>  'Success Login',
+	            'data' =>  [
+	            	'token' => $token,
+	            	'expires' => auth('api')->payload()('exp')
+	            ]
+	        ];
+		}else{
+			JWT::$leeway = 60;
 
-		// 	$token = JWT::encode($data, 'super_seekret_key', 'HS256');
-		// 	// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+			$data["iat"] = Carbon::now()->timestamp;
+			$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
+			$data["nbf"] = Carbon::now()->timestamp;
+			$data["jti"] = Helper::generateRandomString(16);
+			$data["sub"] = '0.0.0.0';
+			// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
+
+			$token = JWT::encode($data, 'super_seekret_key', 'HS256');
+			// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
 			
-		// 	return [
-	 //        	'status' => 200,
-	 //            'message' =>  'Success Login',
-	 //            'data' =>  [
-	 //            	'token' => $token,
-	 //            	'expires' => Carbon::now()->addMinutes(720)->timestamp
-	 //            ]
-	 //        ];
-
-  //   	}else{
-			if(($record->is_ldap != 1) OR ($record->is_ldap != '1')){
-				if (!$token = \Auth::claims($data)->attempt([
-					'username' => $record->username,
-					'password' => request()->password,
-				])){
-		            return [
-		            	'status' => 400,
-		                'message' =>  'Username / Password Salah',
-		                'data' =>  []
-		            ];
-		        }
-
-		        return [
-		        	'status' => 200,
-		            'message' =>  'Success Login',
-		            'data' =>  [
-		            	'token' => $token,
-		            	'expires' => auth('api')->payload()('exp')
-		            ]
-		        ];
-			}else{
-				JWT::$leeway = 60;
-
-				$data["iat"] = Carbon::now()->timestamp;
-				$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
-				$data["nbf"] = Carbon::now()->timestamp;
-				$data["jti"] = Helper::generateRandomString(16);
-				$data["sub"] = '0.0.0.0';
-				// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
-
-				$token = JWT::encode($data, 'super_seekret_key', 'HS256');
-				// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-				
-				return [
-		        	'status' => 200,
-		            'message' =>  'Success Login',
-		            'data' =>  [
-		            	'token' => $token,
-		            	'expires' => Carbon::now()->addMinutes(720)->timestamp
-		            ]
-		        ];
-			}
-    	// }
+			return [
+	        	'status' => 200,
+	            'message' =>  'Success Login',
+	            'data' =>  [
+	            	'token' => $token,
+	            	'expires' => Carbon::now()->addMinutes(720)->timestamp
+	            ]
+	        ];
+		}
 	}
 
 }
