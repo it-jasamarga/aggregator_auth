@@ -52,7 +52,15 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
-
+        
+        'minio' => [
+            'driver' => 'minio',
+            'key' => env('MINIO_KEY', 'aggregator-data-dev'),
+            'secret' => env('MINIO_SECRET', 'aggregator-data-dev'),
+            'region' => env('MINIO_REGION','id-jm-jkt'),
+            'bucket' => env('MINIO_BUCKET','aggregator-data-dev'),
+            'endpoint' => env('MINIO_ENDPOINT','https://cdn.jasamarga.co.id')
+        ]
     ],
 
     /*
