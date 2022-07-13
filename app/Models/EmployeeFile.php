@@ -21,4 +21,7 @@ class EmployeeFile extends Model
         'UPDATED_BY',
     ];
 
+    public function getUrlAttribute(){
+        return (\Storage::disk('minio')->exists($this->attributes['url'])) ? \Storage::disk('minio')->url($this->attributes['url']) : null;
+    }
 }
