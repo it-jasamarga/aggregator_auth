@@ -334,9 +334,10 @@ class AuthService
 			$data["iat"] = Carbon::now()->timestamp;
 			$data["exp"] = Carbon::now()->addMinutes(720)->timestamp;
 			$data["nbf"] = Carbon::now()->timestamp;
-			$data["jti"] = Helper::generateRandomString(16);
-			$data["sub"] = '0.0.0.0';
-			// $data["prv"] = "38e4bce815cf28c2a3af54149ccbe1332a3e6c6c";
+			$data["jti"] = Helper::generateRandomString(35);
+			$data["sub"] = Carbon::now()->format('Hs');
+			$data["iss"] = url('api/login');
+			$data["prv"] = md5('http://10.1.3.175:8000/api/login');
 
 			$token = JWT::encode($data, 'super_seekret_key', 'HS256');
 			// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
