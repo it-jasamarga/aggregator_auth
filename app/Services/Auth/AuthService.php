@@ -337,7 +337,7 @@ class AuthService
 			$data["jti"] = Helper::generateRandomString(35);
 			$data["sub"] = Carbon::now()->format('Hs');
 			$data["iss"] = url('api/login');
-			$data["prv"] = md5('http://10.1.3.175:8000/api/login');
+			$data["prv"] = md5(Carbon::now()->format('Hs'));
 
 			$token = JWT::encode($data, 'super_seekret_key', 'HS256');
 			// $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
